@@ -3,10 +3,15 @@ import { Container, Paper, TextField, Button, Typography, Box } from '@mui/mater
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
+// 정규식 패턴 (컴포넌트 외부로 이동)
+const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const usernameRegex = /^[a-zA-Z0-9가-힣]{2,20}$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, loading } = useAuth();
-  
+
   const [signupData, setSignupData] = useState({
     email: '',
     username: '',
@@ -21,11 +26,6 @@ const SignupPage = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // 정규식 패턴
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  const usernameRegex = /^[a-zA-Z0-9가-힣]{2,20}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSignupData(prevState => ({
@@ -35,45 +35,24 @@ const SignupPage = () => {
 
     // 유효성 검사
     if (name === 'email') {
-      if (!emailRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          email: '올바른 이메일 형식이 아닙니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          email: ''
-        }));
-      }
+      setErrors(prev => ({
+        ...prev,
+        email: emailRegex.test(value) ? '' : '올바른 이메일 형식이 아닙니다'
+      }));
     }
 
     if (name === 'username') {
-      if (!usernameRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          username: '2-20자의 영문, 숫자, 한글만 사용 가능합니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          username: ''
-        }));
-      }
+      setErrors(prev => ({
+        ...prev,
+        username: usernameRegex.test(value) ? '' : '2-20자의 영문, 숫자, 한글만 사용 가능합니다'
+      }));
     }
 
     if (name === 'password') {
-      if (!passwordRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          password: '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          password: ''
-        }));
-      }
+      setErrors(prev => ({
+        ...prev,
+        password: passwordRegex.test(value) ? '' : '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
+      }));
     }
   };
 
@@ -96,7 +75,7 @@ const SignupPage = () => {
           localStorage.setItem('token', response.token);
         }
         // Dashboard로 이동
-        navigate('/dashboard');
+        navigate('/LoginPage');
       } catch (error) {
         // 에러는 useAuth 내에서 처리됨
         console.error('회원가입 실패:', error);
@@ -192,4 +171,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage; 
+export default SignupPage;
