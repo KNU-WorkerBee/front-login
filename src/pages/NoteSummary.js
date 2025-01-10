@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import '../styles/NoteSummary.css';
 import Layout from '../components/Layout';
 
 function NoteSummary() {
-  const [text, setText] = useState('');
+  const [transcribedText, setTranscribedText] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!text.trim()) {
+  useEffect(() => {
+    // Dashboard에서 저장한 텍스트 불러오기
+    const savedText = localStorage.getItem('transcribedText');
+    if (savedText) {
+      setTranscribedText(savedText);
+    }
+
+    // 컴포넌트가 언마운트될 때 localStorage 초기화
+    return () => {
+      localStorage.removeItem('transcribedText');
+    };
+  }, []);
+
+  const handleTextChange = (e) => {
+    setTranscribedText(e.target.value);
+    // 수정된 텍스트를 localStorage에 저장
+    localStorage.setItem('transcribedText', e.target.value);
+  };
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleSummarize = async () => {
+    if (!transcribedText.trim()) {
       setError('텍스트를 입력해주세요.');
       return;
     }
@@ -20,21 +43,17 @@ function NoteSummary() {
     setError(null);
 
     try {
-      // API 호출 예시 (실제 구현 시 대체 필요)
-      // const response = await fetch('/api/summarize', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ text }),
-      // });
-      // const data = await response.json();
-      
       // 임시 응답 (API 연동 전)
       setTimeout(() => {
         setSummary({
           summary: "여기에 AI가 생성한 요약이 표시됩니다...",
-          keywords: ["키워드1", "키워드2", "키워드3"],
+          keywords: [
+            "인공지능",
+            "머신러닝",
+            "딥러닝",
+            "데이터 분석",
+            "알고리즘"
+          ],
           importance: "중요도 높음"
         });
         setIsLoading(false);
@@ -46,51 +65,80 @@ function NoteSummary() {
     }
   };
 
+  const handleClearText = () => {
+    if (window.confirm('모든 텍스트를 삭제하시겠습니까?')) {
+      setTranscribedText('');
+      localStorage.removeItem('transcribedText');
+      setSummary(null); // 요약 결과도 함께 초기화
+    }
+  };
+
   return (
     <Layout>
       <Container className="py-4">
-        <h2 className="mb-4">노트 요약</h2>
+        <h2 className="mb-4">강의 요약</h2>
 
         {/* 텍스트 입력 섹션 */}
         <Card className="mb-4">
           <Card.Body>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>텍스트 입력</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={6}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="요약할 텍스트를 입력하세요..."
-                />
-              </Form.Group>
-              <div className="d-grid">
+            <Card.Title className="d-flex justify-content-between align-items-center">
+              <span>변환된 텍스트</span>
+              <div className="d-flex gap-2">
                 <Button 
-                  type="submit" 
-                  variant="primary"
-                  disabled={isLoading || !text.trim()}
+                  variant="outline-primary" 
+                  size="sm"
+                  onClick={handleEditToggle}
                 >
-                  {isLoading ? (
-                    <>
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                        className="me-2"
-                      />
-                      요약 생성 중...
-                    </>
-                  ) : (
-                    '요약 생성하기'
-                  )}
+                  {isEditing ? '완료' : '수정'}
+                </Button>
+                <Button 
+                  variant="outline-danger" 
+                  size="sm"
+                  onClick={handleClearText}
+                >
+                  삭제
                 </Button>
               </div>
-            </Form>
+            </Card.Title>
+            
+            <Form.Group className="mt-3">
+              <Form.Control
+                as="textarea"
+                rows={10}
+                value={transcribedText}
+                onChange={handleTextChange}
+                disabled={!isEditing}
+                placeholder="변환된 텍스트가 여기에 표시됩니다..."
+              />
+            </Form.Group>
           </Card.Body>
         </Card>
+
+        {/* 요약 버튼 */}
+        <div className="d-grid gap-2 mb-4">
+          <Button 
+            variant="primary" 
+            size="lg"
+            onClick={handleSummarize}
+            disabled={isLoading || !transcribedText.trim()}
+          >
+            {isLoading ? (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                  className="me-2"
+                />
+                요약 생성 중...
+              </>
+            ) : (
+              'AI 요약 시작'
+            )}
+          </Button>
+        </div>
 
         {/* 에러 메시지 */}
         {error && (
