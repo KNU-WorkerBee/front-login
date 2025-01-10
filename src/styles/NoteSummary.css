@@ -5,12 +5,15 @@
   border-left: 4px solid #0d6efd;
 }
 
+<<<<<<< HEAD
 .keywords-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
+=======
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637
 .keyword-badge {
   display: inline-block;
   background-color: #e9ecef;

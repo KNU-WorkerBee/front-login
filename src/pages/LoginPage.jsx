@@ -1,4 +1,8 @@
+<<<<<<< HEAD:src/pages/LoginPage.js
 import React, { useState, useEffect, useContext } from 'react';
+=======
+import React, { useState } from 'react';
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637:src/pages/LoginPage.jsx
 import { Container, Paper, TextField, Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -7,6 +11,10 @@ import { AuthContext } from '../contexts/AuthContext';
 // 정규식 패턴을 컴포넌트 외부로 이동
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+// 정규식 패턴을 컴포넌트 외부 상수로 정의
+const EMAIL_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const PASSWORD_REGEX = /^.{1,}$/;
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -25,15 +33,20 @@ const LoginPage = () => {
 
   const [error, setError] = useState('');
 
+<<<<<<< HEAD:src/pages/LoginPage.js
   const [isFormValid, setIsFormValid] = useState(false);
 
+=======
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637:src/pages/LoginPage.jsx
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setLoginData(prevState => ({
       ...prevState,
       [name]: value
     }));
 
+<<<<<<< HEAD:src/pages/LoginPage.js
     // 유효성 검사
     if (name === 'email') {
       if (!EMAIL_REGEX.test(value)) {
@@ -58,6 +71,24 @@ const LoginPage = () => {
     setIsFormValid(isValid);
   }, [loginData]);
 
+=======
+    // 즉시 유효성 검사 실행
+    let emailIsValid = name === 'email' ? EMAIL_REGEX.test(value) : EMAIL_REGEX.test(loginData.email);
+    let passwordIsValid = name === 'password' ? PASSWORD_REGEX.test(value) : PASSWORD_REGEX.test(loginData.password);
+
+    // 에러 메시지 설정 (eval 제거)
+    setErrors(prev => ({
+      ...prev,
+      [name]: name === 'email' 
+        ? (!emailIsValid ? '올바른 이메일 형식이 아닙니다' : '')
+        : (!passwordIsValid ? '비밀번호를 입력해주세요' : '')
+    }));
+
+    // 전체 폼 유효성 설정
+    setIsFormValid(emailIsValid && passwordIsValid);
+  };
+
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637:src/pages/LoginPage.jsx
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

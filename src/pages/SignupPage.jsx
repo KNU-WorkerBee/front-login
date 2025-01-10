@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Paper, TextField, Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
+<<<<<<< HEAD:src/pages/SignupPage.js
 // 정규식 패턴 (컴포넌트 외부로 이동)
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; //
 const usernameRegex = /^[a-zA-Z0-9가-힣]{4,20}$/;
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+=======
+// 정규식 패턴을 컴포넌트 외부 상수로 정의
+const EMAIL_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9가-힣]{2,20}$/;
+const PASSWORD_REGEX = /^.{1,}$/;  // 비밀번호 조건 제거 (1글자 이상이면 됨)
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637:src/pages/SignupPage.jsx
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -28,11 +35,14 @@ const SignupPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // 먼저 데이터 업데이트
     setSignupData(prevState => ({
       ...prevState,
       [name]: value
     }));
 
+<<<<<<< HEAD:src/pages/SignupPage.js
     // 유효성 검사
     if (name === 'email') {
       setErrors(prev => ({
@@ -54,16 +64,27 @@ const SignupPage = () => {
         password: passwordRegex.test(value) ? '' : '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
       }));
     }
-  };
+=======
+    // 즉시 유효성 검사 실행
+    let emailIsValid = name === 'email' ? EMAIL_REGEX.test(value) : EMAIL_REGEX.test(signupData.email);
+    let usernameIsValid = name === 'username' ? USERNAME_REGEX.test(value) : USERNAME_REGEX.test(signupData.username);
+    let passwordIsValid = name === 'password' ? PASSWORD_REGEX.test(value) : PASSWORD_REGEX.test(signupData.password);
 
-  // 폼 유효성 검사
-  useEffect(() => {
-    const isValid = 
-      emailRegex.test(signupData.email) && 
-      usernameRegex.test(signupData.username) && 
-      passwordRegex.test(signupData.password);
-    setIsFormValid(isValid);
-  }, [signupData]);
+    // 에러 메시지 설정 (eval 제거)
+    setErrors(prev => ({
+      ...prev,
+      [name]: 
+        name === 'email' 
+          ? (!emailIsValid ? '올바른 이메일 형식이 아닙니다' : '')
+          : name === 'username'
+            ? (!usernameIsValid ? '2-20자의 영문, 숫자, 한글만 사용 가능합니다' : '')
+            : (!passwordIsValid ? '비밀번호를 입력해주세요' : '')
+    }));
+
+    // 전체 폼 유효성 설정
+    setIsFormValid(emailIsValid && usernameIsValid && passwordIsValid);
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637:src/pages/SignupPage.jsx
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

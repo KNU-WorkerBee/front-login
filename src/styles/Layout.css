@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .layout {
   min-height: 100vh;
   display: flex;
@@ -32,5 +33,84 @@
   .nav-link {
     margin-left: 0;
     padding: 0.5rem 0;
+=======
+/* 전체 레이아웃 */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 메인 컨텐츠 */
+.main-content {
+  flex: 1;
+  padding-top: 76px; /* Navbar 높이 + 여유 공간 */
+  padding-bottom: 2rem;
+  background-color: #f8f9fa;
+}
+
+/* 네비게이션 바 */
+.navbar.navbar-dark {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-dark .nav-link {
+  color: rgba(255,255,255,.8) !important;
+}
+
+.navbar-dark .nav-link:hover {
+  color: #fff !important;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-link {
+  font-size: 1rem;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.2rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  color: #007bff !important;
+}
+
+/* 푸터 */
+.footer {
+  padding: 1.5rem 0;
+  background-color: #343a40;
+  color: #fff;
+}
+
+.footer p {
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0 !important;
+  }
+}
+
+/* 컨테이너 패딩 조정 */
+.container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 992px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+>>>>>>> f0f3655705dbbfd2861bd9de2ee2df081020e637
   }
 } 
