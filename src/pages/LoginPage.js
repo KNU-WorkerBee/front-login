@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Container, Paper, TextField, Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { AuthContext } from '../contexts/AuthContext';
 
 // 정규식 패턴을 컴포넌트 외부로 이동
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -10,6 +11,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, loading } = useAuth();
+  const { setUser } = useContext(AuthContext);
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -64,6 +66,11 @@ const LoginPage = () => {
         password: loginData.password 
       });
       if (response) {
+        // 임시로 이메일을 username으로 사용
+        setUser({
+          username: loginData.email.split('@')[0], // 이메일에서 @ 앞부분만 사용
+          email: loginData.email
+        });
         navigate('/Dashboard');
       }
     } catch (error) {

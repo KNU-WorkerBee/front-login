@@ -1,0 +1,18 @@
+.explanation {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.form-check {
+  padding: 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.form-check:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.form-check-input {
+  margin-top: 0.3rem;
+} 

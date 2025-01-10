@@ -1,3 +1,4 @@
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import LoginPage from './pages/LoginPage';
@@ -7,22 +8,27 @@ import EditUsername from './pages/EditUsername';
 import EditEmail from './pages/EditEmail';
 import Dashboard from './pages/Dashboard';
 import NoteSummary from './pages/NoteSummary';
+import Quiz from './pages/Quiz';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LoginPage />} /> {/* 기본 페이지 설정 */}
-        <Route path="/LoginPage" element={<LoginPage />} />
-        <Route path="/SignupPage" element={<SignupPage />} />
-        <Route path="/Dashboard" element={<Dashboard />} />
-        <Route path="/MyPage" element={<MyPage />} />
-        <Route path="/EditUsername" element={<EditUsername />} />
-        <Route path="/EditEmail" element={<EditEmail />} />
-        <Route path="/summary" element={<NoteSummary />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/LoginPage" element={<LoginPage />} />
+          <Route path="/SignupPage" element={<SignupPage />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/MyPage" element={<MyPage />} />
+          <Route path="/EditUsername" element={<EditUsername />} />
+          <Route path="/EditEmail" element={<EditEmail />} />
+          <Route path="/summary" element={<NoteSummary />} />
+          <Route path="/quiz" element={<Quiz />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
