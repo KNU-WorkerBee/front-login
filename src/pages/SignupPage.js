@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 // 정규식 패턴 (컴포넌트 외부로 이동)
-const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-const usernameRegex = /^[a-zA-Z0-9가-힣]{2,20}$/;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; //
+const usernameRegex = /^[a-zA-Z0-9가-힣]{4,20}$/;
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 const SignupPage = () => {
@@ -44,7 +44,7 @@ const SignupPage = () => {
     if (name === 'username') {
       setErrors(prev => ({
         ...prev,
-        username: usernameRegex.test(value) ? '' : '2-20자의 영문, 숫자, 한글만 사용 가능합니다'
+        username: usernameRegex.test(value) ? '' : '4-20자의 영문, 숫자, 한글만 사용 가능합니다'
       }));
     }
 
@@ -69,16 +69,23 @@ const SignupPage = () => {
     e.preventDefault();
     if (isFormValid) {
       try {
-        const response = await signup(signupData.email, signupData.password, signupData.username);
-        // 회원가입 성공 시 받은 토큰을 저장
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        // Dashboard로 이동
-        navigate('/LoginPage');
+        const response = await signup(
+          signupData.email,
+          signupData.password,
+          signupData.username
+        );
+        
+        console.log('회원가입 응답:', response);
+
+        navigate('/LoginPage', { replace: true });
+        
       } catch (error) {
-        // 에러는 useAuth 내에서 처리됨
         console.error('회원가입 실패:', error);
+        // 에러 메시지 표시
+        setErrors(prev => ({
+          ...prev,
+          submit: '회원가입에 실패했습니다. 다시 시도해주세요.'
+        }));
       }
     }
   };
@@ -159,7 +166,7 @@ const SignupPage = () => {
           <Box sx={{ textAlign: 'center' }}>
             <Button
               color="primary"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/LoginPage', { replace: true })}
               sx={{ textTransform: 'none' }}
             >
               이미 계정이 있으신가요? 로그인하기

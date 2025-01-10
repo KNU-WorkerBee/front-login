@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 // 정규식 패턴을 컴포넌트 외부로 이동
-const EMAIL_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
 
 const LoginPage = () => {
@@ -47,19 +47,6 @@ const LoginPage = () => {
       }
     }
 
-    if (name === 'password') {
-      if (!PASSWORD_REGEX.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          password: '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          password: ''
-        }));
-      }
-    }
   };
 
   // 폼 유효성 검사
@@ -149,7 +136,7 @@ const LoginPage = () => {
           <Box sx={{ textAlign: 'center' }}>
             <Button
               color="primary"
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/SignupPage')}
               sx={{ textTransform: 'none' }}
             >
               아직 회원이 아니신가요? 회원가입하기

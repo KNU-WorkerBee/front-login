@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+//토큰 요청 헤더 추가 + 토큰 만료 처리
 const instance = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://34.22.101.228:8080',
   headers: {
