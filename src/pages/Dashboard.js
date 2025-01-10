@@ -1,23 +1,26 @@
 import React, { useState, useRef } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/Dashboard.css';
 import Layout from '../components/Layout';
+
+// axios 인스턴스 생성
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080', // 서버 포트 수정
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
 
 const Dashboard = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [transcriptionStatus, setTranscriptionStatus] = useState(null);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcribedText, setTranscribedText] = useState('');
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-
-  // 더미 텍스트 데이터 (나중에 실제 변환된 텍스트로 대체)
-  const dummyTranscription = `
-    안녕하세요. 오늘은 인공지능의 기초에 대해 알아보겠습니다.
-    인공지능은 인간의 학습능력과 추론능력, 지각능력을 인공적으로 구현한 컴퓨터 시스템을 말합니다.
-    머신러닝은 인공지능의 한 분야로, 데이터를 기반으로 패턴을 학습하고 결과를 예측하는 기술입니다.
-  `.trim();
 
   // 파일 선택 처리
   const handleFileSelect = (event) => {
@@ -60,7 +63,7 @@ const Dashboard = () => {
   // 더미 지연 함수
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // 파일 업로드 처리
+  // 파일 업로드 및 텍스트 변환 처리
   const handleUpload = async () => {
     if (!uploadedFile) {
       alert('업로드할 파일을 선택해주세요.');
@@ -69,41 +72,83 @@ const Dashboard = () => {
 
     try {
       setIsUploading(true);
-      await delay(2000);
-
-      const dummyResponse = {
-        success: true,
-        data: {
-          fileId: Math.random().toString(36).substr(2, 9),
-          fileName: uploadedFile.name,
-          uploadedAt: new Date().toISOString(),
-          fileUrl: `https://example.com/uploads/${uploadedFile.name}`,
-          transcription: dummyTranscription
-        }
-      };
-
-      console.log('업로드 성공:', dummyResponse);
-      
-      setUploadedFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      
-      alert('파일이 성공적으로 업로드되었습니다.');
       setTranscriptionStatus('진행중');
       setIsTranscribing(true);
+
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
       
-      await delay(3000);
-      setTranscriptionStatus('완료');
-      setIsTranscribing(false);
-      localStorage.setItem('transcribedText', dummyResponse.data.transcription);
+      // 요청 전에 파일 정보 로깅
+      console.log('Uploading file:', {
+        name: uploadedFile.name,
+        type: uploadedFile.type,
+        size: uploadedFile.size
+      });
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('인증 토큰이 없습니다.');
+      }
+
+      const response = await api.post('/api/speech/transcribe', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        },
+        timeout: 30000
+      });
+
+      if (response.data && response.data.transcript) { // 'text' 대신 'transcript'로 변경
+        const convertedText = response.data.transcript;
+        setTranscribedText(convertedText);
+        localStorage.setItem('transcribedText', convertedText);
+        
+        setUploadedFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+        alert('파일이 성공적으로 변환되었습니다.');
+        setTranscriptionStatus('완료');
+      } else {
+        throw new Error('텍스트 변환 결과가 없습니다.');
+      }
       
     } catch (error) {
-      console.error('Upload error:', error);
-      alert('업로드 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('Upload error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      let errorMessage = '텍스트 변환 중 오류가 발생했습니다.';
+      
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
+            navigate('/login');
+            break;
+          case 413:
+            errorMessage = '파일 크기가 너무 큽니다.';
+            break;
+          case 415:
+            errorMessage = '지원하지 않는 파일 형식입니다.';
+            break;
+          case 500:
+            errorMessage = '서버 오류가 발생했습니다.';
+            break;
+          default:
+            errorMessage = `오류가 발생했습니다: ${error.response.data.message || '알 수 없는 오류'}`;
+        }
+      } else if (error.request) {
+        errorMessage = '서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.';
+      }
+
+      alert(errorMessage);
       setTranscriptionStatus('실패');
     } finally {
       setIsUploading(false);
+      setIsTranscribing(false);
     }
   };
 
@@ -189,7 +234,7 @@ const Dashboard = () => {
                     <Form.Control
                       as="textarea"
                       rows={6}
-                      value={dummyTranscription}
+                      value={transcribedText}
                       readOnly
                       className="mb-3"
                     />

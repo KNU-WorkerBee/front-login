@@ -1,25 +1,17 @@
 import React from 'react';
-import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { Container, Navbar, Nav, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Layout.css';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthContext();
+  const { logout } = useAuth();
+  const username = "사용자";  // 나중에 실제 사용자 정보로 대체
 
-  const getDisplayName = () => {
-    if (!user) return '사용자';
-    return user.username || user.name || user.email?.split('@')[0] || '사용자';
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/LoginPage');
   };
 
   return (
@@ -39,20 +31,12 @@ const Layout = ({ children }) => {
             </Nav>
             {/* 오른쪽 메뉴 */}
             <Nav>
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="dark" id="user-dropdown" className="nav-user-dropdown">
-                  <i className="bi bi-person-circle"></i> {getDisplayName()}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => navigate('/MyPage')}>
-                    마이페이지
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>
-                    로그아웃
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+              <Nav.Link onClick={() => navigate('/MyPage')}>
+                <i className="bi bi-person-circle"></i> {username}
+              </Nav.Link>
+              <Button variant="outline-light" onClick={handleLogout}>
+                로그아웃
+              </Button>
             </Nav>
           </Navbar.Collapse>
         </Container>
