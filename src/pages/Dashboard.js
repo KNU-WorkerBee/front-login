@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -21,6 +21,15 @@ const Dashboard = () => {
   const [transcribedText, setTranscribedText] = useState('');
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // 파이지 로드 시 저장된 텍스트 불러오기
+  useEffect(() => {
+    const savedText = localStorage.getItem('transcribedText');
+    if (savedText) {
+      setTranscribedText(savedText);
+      setTranscriptionStatus('완료');  // 텍스트가 있으면 상태도 완료로 설정
+    }
+  }, []);
 
   // 파일 선택 처리
   const handleFileSelect = (event) => {
@@ -98,7 +107,7 @@ const Dashboard = () => {
         timeout: 30000
       });
 
-      if (response.data && response.data.transcript) { // 'text' 대신 'transcript'로 변경
+      if (response.data && response.data.transcript) {
         const convertedText = response.data.transcript;
         setTranscribedText(convertedText);
         localStorage.setItem('transcribedText', convertedText);
@@ -108,7 +117,6 @@ const Dashboard = () => {
           fileInputRef.current.value = '';
         }
         
-        alert('파일이 성공적으로 변환되었습니다.');
         setTranscriptionStatus('완료');
       } else {
         throw new Error('텍스트 변환 결과가 없습니다.');
@@ -150,6 +158,21 @@ const Dashboard = () => {
       setIsUploading(false);
       setIsTranscribing(false);
     }
+  };
+
+  const handleQuiz = () => {
+    navigate('/quiz');
+  };
+
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(transcribedText)
+      .then(() => {
+        alert('텍스트가 클립보드에 복사되었습니다.');
+      })
+      .catch(err => {
+        console.error('텍스트 복사 실패:', err);
+        alert('텍스트 복사에 실패했습니다.');
+      });
   };
 
   const handleSummarize = () => {
@@ -227,10 +250,10 @@ const Dashboard = () => {
                   </div>
                 ) : transcriptionStatus === '완료' ? (
                   <div>
-                    <div className="text-success mb-3">
+                    {/* <div className="text-success mb-3">
                       <i className="bi bi-check-circle me-2"></i>
                       텍스트 변환이 완료되었습니다.
-                    </div>
+                    </div> */}
                     <Form.Control
                       as="textarea"
                       rows={6}
@@ -250,16 +273,44 @@ const Dashboard = () => {
           </Card>
         )}
 
-        {/* 요약하기 버튼 */}
+        {/* 요약하기 버튼을 버튼 그룹으로 변경 */}
         {transcriptionStatus === '완료' && (
           <div className="d-grid gap-2">
-            <Button 
-              variant="primary" 
-              size="lg"
-              onClick={handleSummarize}
-            >
-              요약하기
-            </Button>
+            <div className="row g-2">
+              <div className="col-md-4">
+                <Button 
+                  variant="primary" 
+                  size="lg"
+                  onClick={handleSummarize}
+                  className="w-100"
+                >
+                  <i className="bi bi-file-text me-2"></i>
+                  요약
+                </Button>
+              </div>
+              <div className="col-md-4">
+                <Button 
+                  variant="success" 
+                  size="lg"
+                  onClick={handleQuiz}
+                  className="w-100"
+                >
+                  <i className="bi bi-question-circle me-2"></i>
+                  퀴즈
+                </Button>
+              </div>
+              <div className="col-md-4">
+                <Button 
+                  variant="secondary" 
+                  size="lg"
+                  onClick={handleCopyText}
+                  className="w-100"
+                >
+                  <i className="bi bi-clipboard me-2"></i>
+                  복사
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </Container>

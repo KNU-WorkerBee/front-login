@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form, Alert, ProgressBar } from 'react-bootstrap';
 import Layout from '../components/Layout';
 import '../styles/Quiz.css';
@@ -12,6 +12,14 @@ function Quiz() {
   const [isLoading, setIsLoading] = useState(false);
   const [textInput, setTextInput] = useState('');
   const [quizStarted, setQuizStarted] = useState(false);
+
+  // localStorage에서 텍스트 가져오기
+  useEffect(() => {
+    const savedText = localStorage.getItem('transcribedText');
+    if (savedText) {
+      setTextInput(savedText);
+    }
+  }, []);
 
   // AI에게 텍스트를 보내고 퀴즈를 생성하는 함수
   const generateQuiz = async () => {

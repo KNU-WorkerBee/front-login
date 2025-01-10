@@ -11,16 +11,10 @@ function NoteSummary() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Dashboard에서 저장한 텍스트 불러오기
     const savedText = localStorage.getItem('transcribedText');
     if (savedText) {
       setTranscribedText(savedText);
     }
-
-    // 컴포넌트가 언마운트될 때 localStorage 초기화
-    return () => {
-      localStorage.removeItem('transcribedText');
-    };
   }, []);
 
   const handleTextChange = (e) => {
@@ -82,7 +76,7 @@ function NoteSummary() {
         <Card className="mb-4">
           <Card.Body>
             <Card.Title className="d-flex justify-content-between align-items-center">
-              <span>변환된 텍스트</span>
+              <span>텍스트 입력</span>
               <div className="d-flex gap-2">
                 <Button 
                   variant="outline-primary" 
@@ -108,7 +102,7 @@ function NoteSummary() {
                 value={transcribedText}
                 onChange={handleTextChange}
                 disabled={!isEditing}
-                placeholder="변환된 텍스트가 여기에 표시됩니다..."
+                placeholder="텍스트를 입력해주세요."
               />
             </Form.Group>
           </Card.Body>
