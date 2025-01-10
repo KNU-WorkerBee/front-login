@@ -1,0 +1,36 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-bottom: 2rem;
+}
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+  font-weight: 500;
+  font-size: 1.25rem;
+}
+
+.nav-link {
+  margin-left: 1rem;
+}
+
+.footer {
+  margin-top: auto;
+  background-color: var(--box-background) !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .nav-link {
+    margin-left: 0;
+    padding: 0.5rem 0;
+  }
+} 
