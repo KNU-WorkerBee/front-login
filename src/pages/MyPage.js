@@ -11,6 +11,10 @@ const MyPage = () => {
   console.log('Current user:', user);
   const navigate = useNavigate();
 
+  const getDisplayName = () => {
+    return user?.username || user?.name || user?.email?.split('@')[0] || '사용자';
+  };
+
   const handleEditProfile = () => {
     navigate('/edit-profile');
   };
@@ -40,11 +44,11 @@ const MyPage = () => {
                   <div className="profile-image mb-3">
                     <i className="bi bi-person-circle display-1"></i>
                   </div>
-                  <h3 className="user-name mb-1">{userInfo?.name || '사용자'}</h3>
+                  <h3 className="user-name mb-1">{getDisplayName()}</h3>
                   <div className="user-info mb-4">
                     <p className="text-muted mb-2">
                       <i className="bi bi-envelope me-2"></i>
-                      {userInfo?.email}
+                      {user?.email}
                     </p>
                     <p className="text-muted mb-2">
                       <i className="bi bi-calendar me-2"></i>

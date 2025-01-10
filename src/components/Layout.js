@@ -2,12 +2,18 @@ import React from 'react';
 import { Container, Navbar, Nav, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../contexts/AuthContext'; 
 import '../styles/Layout.css';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const username = "사용자";  // 나중에 실제 사용자 정보로 대체
+  const { user } = useAuthContext();
+
+  const getDisplayName = () => {
+    return user?.username || user?.name || user?.email?.split('@')[0] || '사용자';
+  };
 
   const handleLogout = () => {
     logout();
@@ -32,7 +38,7 @@ const Layout = ({ children }) => {
             {/* 오른쪽 메뉴 */}
             <Nav>
               <Nav.Link onClick={() => navigate('/MyPage')}>
-                <i className="bi bi-person-circle"></i> {username}
+                <i className="bi bi-person-circle"></i> {getDisplayName()}
               </Nav.Link>
               <Button variant="outline-light" onClick={handleLogout}>
                 로그아웃
