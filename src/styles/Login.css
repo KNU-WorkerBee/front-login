@@ -1,0 +1,122 @@
+:root {
+  /* 라이트 모드 변수 */
+  --background-color: #f8f9fa;
+  --box-background: rgb(48, 48, 48);
+  --text-color: #333;
+  --text-muted: rgb(179, 179, 179);
+  --input-background: rgba(255, 255, 255, 0.9);
+}
+
+/* 다크 모드 변수 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #1a1a1a;
+    --box-background: rgb(48, 48, 48);
+    --text-color: white;
+    --text-muted: rgb(179, 179, 179);
+    --input-background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.login-container {
+  min-height: 100vh;
+  background-color: var(--background-color);
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.login-box {
+  background-color: var(--box-background);
+  border-radius: 6px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  color: var(--text-color);
+}
+
+.login-box h2 {
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+}
+
+.login-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-control {
+  background-color: #ffffff !important;
+  border: none !important;
+  padding: 0.8rem !important;
+  color: #333333 !important;
+}
+
+.form-control::placeholder {
+  color: #999999 !important;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 192, 203, 0.25) !important;
+  background-color: #ffffff !important;
+  color: #333333 !important;
+}
+
+.form-text {
+  color: var(--text-muted) !important;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.form-label {
+  color: var(--text-color);
+}
+
+.login-button {
+  padding: 0.8rem !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.login-button:not(:disabled) {
+  background-color: pink !important;
+  border-color: pink !important;
+}
+
+.login-button:not(:disabled):hover {
+  background-color: #ff9999 !important;
+  border-color: #ff9999 !important;
+}
+
+.register-link {
+  color: var(--text-muted);
+  margin-top: 1rem;
+}
+
+.register-link button {
+  color: pink !important;
+  text-decoration: none;
+}
+
+.register-link button:hover {
+  color: #ff9999 !important;
+}
+
+.validation-message {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.validation-message.valid {
+  color: #28a745;
+}
+
+.validation-message.invalid {
+  color: #dc3545;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .login-box {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+} 

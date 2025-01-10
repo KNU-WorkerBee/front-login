@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Paper, TextField, Button, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+
+// 정규식 패턴을 컴포넌트 외부 상수로 정의
+const EMAIL_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9가-힣]{2,20}$/;
+const PASSWORD_REGEX = /^.{1,}$/;  // 비밀번호 조건 제거 (1글자 이상이면 됨)
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -21,70 +26,34 @@ const SignupPage = () => {
 
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // 정규식 패턴
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  const usernameRegex = /^[a-zA-Z0-9가-힣]{2,20}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // 먼저 데이터 업데이트
     setSignupData(prevState => ({
       ...prevState,
       [name]: value
     }));
 
-    // 유효성 검사
-    if (name === 'email') {
-      if (!emailRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          email: '올바른 이메일 형식이 아닙니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          email: ''
-        }));
-      }
-    }
+    // 즉시 유효성 검사 실행
+    let emailIsValid = name === 'email' ? EMAIL_REGEX.test(value) : EMAIL_REGEX.test(signupData.email);
+    let usernameIsValid = name === 'username' ? USERNAME_REGEX.test(value) : USERNAME_REGEX.test(signupData.username);
+    let passwordIsValid = name === 'password' ? PASSWORD_REGEX.test(value) : PASSWORD_REGEX.test(signupData.password);
 
-    if (name === 'username') {
-      if (!usernameRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          username: '2-20자의 영문, 숫자, 한글만 사용 가능합니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          username: ''
-        }));
-      }
-    }
+    // 에러 메시지 설정 (eval 제거)
+    setErrors(prev => ({
+      ...prev,
+      [name]: 
+        name === 'email' 
+          ? (!emailIsValid ? '올바른 이메일 형식이 아닙니다' : '')
+          : name === 'username'
+            ? (!usernameIsValid ? '2-20자의 영문, 숫자, 한글만 사용 가능합니다' : '')
+            : (!passwordIsValid ? '비밀번호를 입력해주세요' : '')
+    }));
 
-    if (name === 'password') {
-      if (!passwordRegex.test(value)) {
-        setErrors(prev => ({
-          ...prev,
-          password: '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          password: ''
-        }));
-      }
-    }
+    // 전체 폼 유효성 설정
+    setIsFormValid(emailIsValid && usernameIsValid && passwordIsValid);
   };
-
-  // 폼 유효성 검사
-  useEffect(() => {
-    const isValid = 
-      emailRegex.test(signupData.email) && 
-      usernameRegex.test(signupData.username) && 
-      passwordRegex.test(signupData.password);
-    setIsFormValid(isValid);
-  }, [signupData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
