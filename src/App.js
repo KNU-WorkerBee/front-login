@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';

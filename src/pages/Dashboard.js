@@ -1,241 +1,166 @@
-import React, { useState } from 'react';
-import { 
-  Container, 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
-  Card, 
-  CardContent,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Modal,
-  Paper,
-  Chip
-} from '@mui/material';
-import { AccountCircle, CloudUpload, Close } from '@mui/icons-material';
+import React, { useState, useRef } from 'react';
+import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import '../styles/Dashboard.css';
 import { protectedAPI } from '../services/api';
-import { useAuth } from '../hooks/useAuth';
+import Layout from '../components/Layout';
 
 const Dashboard = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [recordedBlob, setRecordedBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const { logout } = useAuth();
-  const [openUploadModal, setOpenUploadModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [showResults, setShowResults] = useState(false);
-  const [showFullText, setShowFullText] = useState(false);
+
+  // 녹음 시작
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setAudioURL(audioUrl);
+        setRecordedBlob(audioBlob);
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('마이크 접근에 실패했습니다.');
+    }
+  };
+
+  // 녹음 중지
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  // 파일 선택 처리
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploadedFile(file);
+    }
+  };
 
   // 파일 업로드 처리
-  const handleFileSelect = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
-  const fetchLectures = async () => {
-    try {
-      const lectures = await protectedAPI.getLectures();
-      // 강의 목록 처리
-      console.log('강의 목록:', lectures);
-    } catch (error) {
-      console.error('강의 목록 가져오기 실패:', error);
-    }
-  };
-
   const handleUpload = async () => {
+    const fileToUpload = recordedBlob || uploadedFile;
+    if (!fileToUpload) {
+      alert('업로드할 파일을 선택하거나 녹음해주세요.');
+      return;
+    }
+
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append('audio', fileToUpload);
+      
       const result = await protectedAPI.uploadLecture(formData);
       console.log('업로드 성공:', result);
-      setShowResults(true);
-      setOpenUploadModal(false);
+      
+      // 업로드 후 상태 초기화
+      setAudioURL(null);
+      setUploadedFile(null);
+      setRecordedBlob(null);
+      
+      alert('파일이 성공적으로 업로드되었습니다.');
     } catch (error) {
-      console.error('업로드 실패:', error);
+      console.error('Upload error:', error);
+      alert('업로드 중 오류가 발생했습니다.');
     }
-  };
-
-  // 로그아웃 처리
-  const handleLogout = () => {
-    logout();
-    navigate('/');
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* 헤더 */}
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            LectureLens
-          </Typography>
-          <IconButton 
-            color="inherit" 
-            onClick={() => navigate('/MyPage')}
-            sx={{ mr: 2 }}
-          >
-            <AccountCircle />
-          </IconButton>
-          <Button color="inherit" onClick={handleLogout}>
-            로그아웃
-          </Button>
-        </Toolbar>
-      </AppBar>
+    <Layout>
+      <Container className="py-4">
+        <h2 className="mb-4">강의 녹음</h2>
+        
+        {/* 녹음 섹션 */}
+        <Card className="mb-4">
+          <Card.Body>
+            <Card.Title>직접 녹음하기</Card.Title>
+            <div className="d-grid gap-2">
+              {!isRecording ? (
+                <Button variant="primary" onClick={startRecording}>
+                  녹음 시작
+                </Button>
+              ) : (
+                <div>
+                  <Button variant="danger" onClick={stopRecording}>
+                    녹음 중지
+                  </Button>
+                  <span className="ms-2 recording-indicator">● 녹음중</span>
+                </div>
+              )}
+            </div>
 
-      {/* 메인 컨텐츠 */}
-      <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          홍길동님, 반갑습니다!
-        </Typography>
-
-        {/* 업로드 버튼 */}
-        <Card sx={{ mt: 4, mb: 4 }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              이곳에서 강의를 업로드하고 AI 요약을 받으세요.
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<CloudUpload />}
-              size="large"
-              onClick={() => setOpenUploadModal(true)}
-              sx={{ mt: 2 }}
-            >
-              강의 업로드하기
-            </Button>
-          </CardContent>
+            {/* 녹음 미리보기 */}
+            {audioURL && (
+              <div className="audio-preview">
+                <h5>녹음 미리보기</h5>
+                <audio controls src={audioURL} className="w-100" />
+              </div>
+            )}
+          </Card.Body>
         </Card>
 
-        {/* 결과 표시 영역 */}
-        {showResults && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" gutterBottom>
-              강의 요약
-            </Typography>
-            <Paper sx={{ p: 3, mb: 4 }}>
-              <Typography paragraph>
-                첫 번째 요약 문장이 들어갑니다.
-              </Typography>
-              <Typography paragraph>
-                두 번째 요약 문장이 들어갑니다.
-              </Typography>
-              <Typography>
-                세 번째 요약 문장이 들어갑니다.
-              </Typography>
-            </Paper>
-
-            <Typography variant="h5" gutterBottom>
-              키워드
-            </Typography>
-            <Box sx={{ mb: 4 }}>
-              {['AI', '학습', '리뷰', '키워드1', '키워드2'].map((keyword) => (
-                <Chip
-                  key={keyword}
-                  label={`#${keyword}`}
-                  sx={{ m: 0.5 }}
-                />
-              ))}
-            </Box>
-
-            <Button
-              variant="outlined"
-              onClick={() => setShowFullText(!showFullText)}
-              sx={{ mb: 2 }}
+        {/* 파일 업로드 섹션 */}
+        <Card className="mb-4">
+          <Card.Body>
+            <Card.Title>파일 업로드</Card.Title>
+            <div 
+              className="upload-section"
+              onClick={() => fileInputRef.current?.click()}
             >
-              {showFullText ? 'STT 전체 내용 접기' : 'STT 전체 내용 보기'}
-            </Button>
-
-            {showFullText && (
-              <Paper sx={{ p: 3, mb: 4, maxHeight: 300, overflow: 'auto' }}>
-                <Typography>
-                  STT로 변환된 전체 텍스트가 이곳에 표시됩니다...
-                </Typography>
-              </Paper>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                accept="audio/*"
+                style={{ display: 'none' }}
+              />
+              <p className="mb-0">
+                클릭하여 파일을 선택하거나 파일을 여기로 드래그하세요
+              </p>
+            </div>
+            {uploadedFile && (
+              <Alert variant="info" className="mt-3">
+                선택된 파일: {uploadedFile.name}
+              </Alert>
             )}
+          </Card.Body>
+        </Card>
 
-            <Button
-              variant="contained"
-              color="secondary"
-              sx={{ mb: 4 }}
-            >
-              단답형 퀴즈 만들기
-            </Button>
-          </Box>
-        )}
-
-        {/* 최근 강의 목록 */}
-        <Typography variant="h5" gutterBottom>
-          최근 강의 목록
-        </Typography>
-        <List>
-          <ListItem>
-            <ListItemText 
-              primary="인공지능 개론 1강" 
-              secondary="2024-01-20" 
-            />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText 
-              primary="데이터베이스 2강" 
-              secondary="2024-01-19" 
-            />
-          </ListItem>
-        </List>
-      </Container>
-
-      {/* 파일 업로드 모달 */}
-      <Modal
-        open={openUploadModal}
-        onClose={() => setOpenUploadModal(false)}
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2
-        }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6">
-              강의 파일 업로드
-            </Typography>
-            <IconButton onClick={() => setOpenUploadModal(false)}>
-              <Close />
-            </IconButton>
-          </Box>
-          <Typography sx={{ mb: 2 }}>
-            mp3, wav 등 형식의 강의 파일을 업로드하세요.
-          </Typography>
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={handleFileSelect}
-            style={{ marginBottom: '20px' }}
-          />
-          {selectedFile && (
-            <Typography sx={{ mb: 2 }}>
-              선택된 파일: {selectedFile.name}
-            </Typography>
-          )}
-          <Button
-            variant="contained"
+        {/* 업로드 버튼 */}
+        <div className="d-grid gap-2">
+          <Button 
+            variant="success" 
             onClick={handleUpload}
-            disabled={!selectedFile}
-            fullWidth
+            disabled={!uploadedFile && !recordedBlob}
+            size="lg"
           >
-            업로드
+            파일 업로드
           </Button>
-        </Box>
-      </Modal>
-    </Box>
+        </div>
+      </Container>
+    </Layout>
   );
 };
 
