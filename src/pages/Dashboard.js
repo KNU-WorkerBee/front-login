@@ -19,9 +19,12 @@ import {
 } from '@mui/material';
 import { AccountCircle, CloudUpload, Close } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { protectedAPI } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [openUploadModal, setOpenUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showResults, setShowResults] = useState(false);
@@ -32,15 +35,32 @@ const Dashboard = () => {
     setSelectedFile(event.target.files[0]);
   };
 
-  const handleUpload = () => {
-    // API 호출 로직 구현
-    console.log('파일 업로드:', selectedFile);
-    setShowResults(true);
-    setOpenUploadModal(false);
+  const fetchLectures = async () => {
+    try {
+      const lectures = await protectedAPI.getLectures();
+      // 강의 목록 처리
+      console.log('강의 목록:', lectures);
+    } catch (error) {
+      console.error('강의 목록 가져오기 실패:', error);
+    }
+  };
+
+  const handleUpload = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      const result = await protectedAPI.uploadLecture(formData);
+      console.log('업로드 성공:', result);
+      setShowResults(true);
+      setOpenUploadModal(false);
+    } catch (error) {
+      console.error('업로드 실패:', error);
+    }
   };
 
   // 로그아웃 처리
   const handleLogout = () => {
+    logout();
     navigate('/');
   };
 
@@ -54,7 +74,7 @@ const Dashboard = () => {
           </Typography>
           <IconButton 
             color="inherit" 
-            onClick={() => navigate('/mypage')}
+            onClick={() => navigate('/MyPage')}
             sx={{ mr: 2 }}
           >
             <AccountCircle />

@@ -3,6 +3,10 @@ import { Container, Paper, TextField, Button, Typography, Box } from '@mui/mater
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
+// 정규식 패턴을 컴포넌트 외부로 이동
+const EMAIL_REGEX = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, loading } = useAuth();
@@ -17,11 +21,9 @@ const LoginPage = () => {
     password: ''
   });
 
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [error, setError] = useState('');
 
-  // 정규식 패턴
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +34,7 @@ const LoginPage = () => {
 
     // 유효성 검사
     if (name === 'email') {
-      if (!emailRegex.test(value)) {
+      if (!EMAIL_REGEX.test(value)) {
         setErrors(prev => ({
           ...prev,
           email: '올바른 이메일 형식이 아닙니다'
@@ -46,7 +48,7 @@ const LoginPage = () => {
     }
 
     if (name === 'password') {
-      if (!passwordRegex.test(value)) {
+      if (!PASSWORD_REGEX.test(value)) {
         setErrors(prev => ({
           ...prev,
           password: '최소 8자 이상의 영문자와 숫자를 포함해야 합니다'
@@ -62,23 +64,24 @@ const LoginPage = () => {
 
   // 폼 유효성 검사
   useEffect(() => {
-    const isValid = emailRegex.test(loginData.email) && 
-                   passwordRegex.test(loginData.password);
+    const isValid = EMAIL_REGEX.test(loginData.email) && 
+                   PASSWORD_REGEX.test(loginData.password);
     setIsFormValid(isValid);
   }, [loginData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isFormValid) {
-      try {
-        const response = await login(loginData.email, loginData.password);
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
-          navigate('/dashboard');
-        }
-      } catch (error) {
-        console.error('로그인 실패:', error);
+    try {
+      const response = await login({ 
+        email: loginData.email, 
+        password: loginData.password 
+      });
+      if (response) {
+        navigate('/Dashboard');
       }
+    } catch (error) {
+      setError('로그인에 실패했습니다.');
+      console.error('Login error:', error);
     }
   };
 
@@ -154,6 +157,12 @@ const LoginPage = () => {
           </Box>
         </form>
       </Paper>
+      
+      {error && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
     </Container>
   );
 };

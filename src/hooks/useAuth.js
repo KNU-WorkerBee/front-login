@@ -3,37 +3,22 @@ import { authAPI } from '../services/api';
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const login = async (email, password) => {
+  const login = async (userData) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await authAPI.login(email, password);
-      localStorage.setItem('token', response.data.token);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || '로그인에 실패했습니다');
-      throw err;
-    } finally {
+      const response = await authAPI.login(userData);
       setLoading(false);
+      return response;
+    } catch (error) {
+      setLoading(false);
+      throw error;
     }
   };
 
-  const signup = async (email, password, name) => {
-    try {
-      setLoading(true);
-      const response = await authAPI.signup(email, password, name);
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-      }
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || '회원가입에 실패했습니다');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+  const logout = () => {
+    localStorage.removeItem('token');  // 토큰 제거
   };
 
-  return { login, signup, loading, error };
+  return { login, logout, loading };
 }; 
