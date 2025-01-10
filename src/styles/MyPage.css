@@ -1,0 +1,138 @@
+.profile-card {
+  border: none;
+  box-shadow: 0 0 20px rgba(0,0,0,.08);
+  height: 100%;
+}
+
+.profile-card .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-image {
+  color: #6c757d;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-item h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #0d6efd;
+}
+
+.stat-item span {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.card-header h4 {
+  color: #495057;
+  font-size: 1.25rem;
+}
+
+.list-group-item {
+  padding: 1rem;
+}
+
+.badge {
+  padding: 0.5em 0.8em;
+}
+
+.badge.bg-primary {
+  background-color: #0d6efd !important;
+}
+
+.badge.bg-success {
+  background-color: #198754 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #000;
+}
+
+.badge.bg-info {
+  background-color: #0dcaf0 !important;
+}
+
+.user-info {
+  text-align: left;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.user-info p {
+  margin-bottom: 0.5rem;
+}
+
+.user-info i {
+  width: 20px;
+  text-align: center;
+}
+
+.profile-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.profile-actions .btn {
+  padding: 0.5rem 1rem;
+}
+
+.profile-actions .btn i {
+  font-size: 1.1rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 992px) {
+  .stats-grid {
+    gap: 1rem;
+  }
+  
+  .stat-item {
+    padding: 0.8rem;
+  }
+  
+  .stat-item h4 {
+    font-size: 1.25rem;
+  }
+  
+  .profile-actions {
+    padding: 0 0.5rem;
+  }
+  
+  .user-info {
+    padding: 0.8rem;
+  }
+} 
+
+.equal-height-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.user-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  color: #6c757d;
+} 

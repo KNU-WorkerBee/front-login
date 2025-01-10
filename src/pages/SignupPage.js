@@ -79,6 +79,13 @@ const SignupPage = () => {
 
         navigate('/LoginPage', { replace: true });
         
+        // 회원가입 성공 시
+        const userInfo = {
+          name: signupData.username,
+          email: signupData.email
+        };
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        
       } catch (error) {
         console.error('회원가입 실패:', error);
         // 에러 메시지 표시

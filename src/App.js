@@ -9,6 +9,7 @@ import EditEmail from './pages/EditEmail';
 import Dashboard from './pages/Dashboard';
 import NoteSummary from './pages/NoteSummary';
 import Quiz from './pages/Quiz';
+import EditProfilePage from './pages/EditProfilePage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/EditEmail" element={<EditEmail />} />
           <Route path="/summary" element={<NoteSummary />} />
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/edit-profile" element={<EditProfilePage />} />
         </Routes>
       </Router>
     </AuthProvider>
