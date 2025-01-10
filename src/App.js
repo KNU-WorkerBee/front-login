@@ -6,6 +6,7 @@ import MyPage from './pages/MyPage';
 import EditUsername from './pages/EditUsername';
 import EditEmail from './pages/EditEmail';
 import Dashboard from './pages/Dashboard';
+import NoteSummary from './pages/NoteSummary';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/EditUsername" element={<EditUsername />} />
         <Route path="/EditEmail" element={<EditEmail />} />
+        <Route path="/summary" element={<NoteSummary />} />
       </Routes>
     </Router>
   );

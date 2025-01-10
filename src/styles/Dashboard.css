@@ -22,12 +22,21 @@
   margin-top: 1rem;
 }
 
+.transcript-content {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  border-left: 4px solid #0d6efd;
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 .upload-section {
   border: 2px dashed #dee2e6;
   border-radius: 0.25rem;
   padding: 2rem;
   text-align: center;
-  cursor: pointer;
   transition: all 0.3s ease;
 }
 

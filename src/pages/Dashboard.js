@@ -6,51 +6,9 @@ import { protectedAPI } from '../services/api';
 import Layout from '../components/Layout';
 
 const Dashboard = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [recordedBlob, setRecordedBlob] = useState(null);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-
-  // 녹음 시작
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setAudioURL(audioUrl);
-        setRecordedBlob(audioBlob);
-      };
-
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      alert('마이크 접근에 실패했습니다.');
-    }
-  };
-
-  // 녹음 중지
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-    }
-  };
 
   // 파일 선택 처리
   const handleFileSelect = (event) => {
@@ -60,25 +18,51 @@ const Dashboard = () => {
     }
   };
 
+  // 드래그 앤 드롭 처리
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('audio/')) {
+      setUploadedFile(file);
+    } else {
+      alert('오디오 파일만 업로드 가능합니다.');
+    }
+  };
+
+  // 파일 삭제 처리
+  const handleDelete = () => {
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   // 파일 업로드 처리
   const handleUpload = async () => {
-    const fileToUpload = recordedBlob || uploadedFile;
-    if (!fileToUpload) {
-      alert('업로드할 파일을 선택하거나 녹음해주세요.');
+    if (!uploadedFile) {
+      alert('업로드할 파일을 선택해주세요.');
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append('audio', fileToUpload);
+      formData.append('audio', uploadedFile);
       
       const result = await protectedAPI.uploadLecture(formData);
       console.log('업로드 성공:', result);
       
       // 업로드 후 상태 초기화
-      setAudioURL(null);
       setUploadedFile(null);
-      setRecordedBlob(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       
       alert('파일이 성공적으로 업로드되었습니다.');
     } catch (error) {
@@ -90,44 +74,17 @@ const Dashboard = () => {
   return (
     <Layout>
       <Container className="py-4">
-        <h2 className="mb-4">강의 녹음</h2>
-        
-        {/* 녹음 섹션 */}
-        <Card className="mb-4">
-          <Card.Body>
-            <Card.Title>직접 녹음하기</Card.Title>
-            <div className="d-grid gap-2">
-              {!isRecording ? (
-                <Button variant="primary" onClick={startRecording}>
-                  녹음 시작
-                </Button>
-              ) : (
-                <div>
-                  <Button variant="danger" onClick={stopRecording}>
-                    녹음 중지
-                  </Button>
-                  <span className="ms-2 recording-indicator">● 녹음중</span>
-                </div>
-              )}
-            </div>
-
-            {/* 녹음 미리보기 */}
-            {audioURL && (
-              <div className="audio-preview">
-                <h5>녹음 미리보기</h5>
-                <audio controls src={audioURL} className="w-100" />
-              </div>
-            )}
-          </Card.Body>
-        </Card>
+        <h2 className="mb-4">강의 업로드</h2>
 
         {/* 파일 업로드 섹션 */}
         <Card className="mb-4">
           <Card.Body>
-            <Card.Title>파일 업로드</Card.Title>
+            <Card.Title>녹음파일 업로드</Card.Title>
             <div 
               className="upload-section"
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
             >
               <input
                 type="file"
@@ -141,9 +98,18 @@ const Dashboard = () => {
               </p>
             </div>
             {uploadedFile && (
-              <Alert variant="info" className="mt-3">
-                선택된 파일: {uploadedFile.name}
-              </Alert>
+              <div className="mt-3">
+                <Alert variant="info" className="d-flex justify-content-between align-items-center">
+                  <span>선택된 파일: {uploadedFile.name}</span>
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm"
+                    onClick={handleDelete}
+                  >
+                    삭제
+                  </Button>
+                </Alert>
+              </div>
             )}
           </Card.Body>
         </Card>
@@ -153,7 +119,7 @@ const Dashboard = () => {
           <Button 
             variant="success" 
             onClick={handleUpload}
-            disabled={!uploadedFile && !recordedBlob}
+            disabled={!uploadedFile}
             size="lg"
           >
             파일 업로드
