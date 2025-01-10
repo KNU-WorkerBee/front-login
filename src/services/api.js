@@ -1,5 +1,5 @@
 import axios from '../axios';
-
+//로그인시 토큰 저장
 export const authAPI = {
   login: async (userData) => {
     try {
@@ -17,9 +17,12 @@ export const authAPI = {
   
   signup: async (email, password, name) => {
     try {
+      console.log('Signup API 호출:', { email, password, name });
       const response = await axios.post('/api/auth/signup', { email, password, name });
+      console.log('Signup API 응답:', response.data);
       return response.data;
     } catch (error) {
+      console.error('Signup API error:', error.response?.data || error.message);
       throw error;
     }
   }

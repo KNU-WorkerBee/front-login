@@ -16,9 +16,21 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');  // 토큰 제거
+  const signup = async (email, password, name) => {
+    setLoading(true);
+    try {
+      const response = await authAPI.signup(email, password, name);
+      setLoading(false);
+      return response;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
   };
 
-  return { login, logout, loading };
+  const logout = () => {
+    localStorage.removeItem('token');
+  };
+
+  return { login, signup, logout, loading };
 }; 
